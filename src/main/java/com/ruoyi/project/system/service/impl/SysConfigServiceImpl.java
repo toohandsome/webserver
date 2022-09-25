@@ -178,7 +178,7 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Override
     public void clearConfigCache()
     {
-        Collection<String> keys = redisCache.keys(CacheConstants.SYS_CONFIG_KEY + "*");
+        Collection<String> keys = redisCache.keys(CacheConstants.SYS_CONFIG_KEY );
         redisCache.deleteObject(keys);
     }
 

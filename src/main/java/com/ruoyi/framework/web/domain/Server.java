@@ -75,15 +75,15 @@ public class Server
         this.mem = mem;
     }
 
-    public Jvm getJvm()
-    {
-        return jvm;
-    }
-
-    public void setJvm(Jvm jvm)
-    {
-        this.jvm = jvm;
-    }
+//    public Jvm getJvm()
+//    {
+//        return jvm;
+//    }
+//
+//    public void setJvm(Jvm jvm)
+//    {
+//        this.jvm = jvm;
+//    }
 
     public Sys getSys()
     {
@@ -116,7 +116,7 @@ public class Server
 
         setSysInfo();
 
-        setJvmInfo();
+//        setJvmInfo();
 
         setSysFiles(si.getOperatingSystem());
     }
@@ -173,15 +173,15 @@ public class Server
     /**
      * 设置Java虚拟机
      */
-    private void setJvmInfo() throws UnknownHostException
-    {
-        Properties props = System.getProperties();
-        jvm.setTotal(Runtime.getRuntime().totalMemory());
-        jvm.setMax(Runtime.getRuntime().maxMemory());
-        jvm.setFree(Runtime.getRuntime().freeMemory());
-        jvm.setVersion(props.getProperty("java.version"));
-        jvm.setHome(props.getProperty("java.home"));
-    }
+//    private void setJvmInfo() throws UnknownHostException
+//    {
+//        Properties props = System.getProperties();
+//        jvm.setTotal(Runtime.getRuntime().totalMemory());
+//        jvm.setMax(Runtime.getRuntime().maxMemory());
+//        jvm.setFree(Runtime.getRuntime().freeMemory());
+//        jvm.setVersion(props.getProperty("java.version"));
+//        jvm.setHome(props.getProperty("java.home"));
+//    }
 
     /**
      * 设置磁盘信息

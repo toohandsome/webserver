@@ -39,7 +39,7 @@ public class RedisCache {
      * @param value 缓存的值
      */
     public <T> void setCacheObject(final String key, final T value) {
-        timedCache.put(key, value);
+        timedCache.put(key, value,0);
     }
 
     /**

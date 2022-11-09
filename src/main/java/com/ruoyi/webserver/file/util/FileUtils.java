@@ -3,7 +3,7 @@ package com.ruoyi.webserver.file.util;
 
 import com.ruoyi.webserver.file.entity.ServerFile;
 
-public class FileUtil {
+public class FileUtils {
 
     public static String getFullPath(ServerFile serverFile) {
         return serverFile.getDir() + java.io.File.separator + serverFile.getName();
@@ -27,6 +27,14 @@ public class FileUtil {
 
     public static boolean isDel(ServerFile serverFile) {
         return serverFile.getOpType() == 2;
+    }
+
+    public static boolean isZip(ServerFile serverFile) {
+        return serverFile.getOpType() == 3;
+    }
+
+    public static boolean isUnZip(ServerFile serverFile) {
+        return serverFile.getOpType() == 4;
     }
 
 }

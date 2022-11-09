@@ -1,12 +1,15 @@
 package com.ruoyi.webserver.file.service.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RuntimeUtil;
+import cn.hutool.core.util.ZipUtil;
 import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.webserver.file.entity.ServerFile;
 import com.ruoyi.webserver.file.service.FileService;
-import com.ruoyi.webserver.file.util.FileUtil;
+import com.ruoyi.webserver.file.util.FileUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +22,7 @@ import java.util.List;
  * @author mysgk
  */
 @Slf4j
+@Service
 public class FileServiceImpl implements FileService {
 
     @Override
@@ -31,6 +35,7 @@ public class FileServiceImpl implements FileService {
         try {
             ret = RuntimeUtil.execForStr("ls -l -a" + property);
         } catch (Exception e) {
+            e.printStackTrace();
             ret = RuntimeUtil.execForStr("ls -l" + property);
         }
         return AjaxResult.success(ret);
@@ -40,7 +45,7 @@ public class FileServiceImpl implements FileService {
     public AjaxResult jumpTo(ServerFile serverFile) {
         String ret = "";
         try {
-            ret = RuntimeUtil.execForStr("ls -l -a" + serverFile.getDir());
+            ret = RuntimeUtil.execForStr("ls -l -A" + serverFile.getDir());
         } catch (Exception e) {
             ret = RuntimeUtil.execForStr("ls -l" + serverFile.getDir());
         }
@@ -55,13 +60,14 @@ public class FileServiceImpl implements FileService {
             multipartFile.transferTo(Paths.get(absPath));
             return AjaxResult.success();
         } catch (Exception e) {
+            e.printStackTrace();
             return AjaxResult.error(e.getMessage());
         }
     }
 
     @Override
     public AjaxResult newFile(ServerFile serverFile) {
-        File realFile = new File(FileUtil.getFullPath(serverFile));
+        File realFile = new File(FileUtils.getFullPath(serverFile));
         try {
             if (realFile.getParentFile().mkdirs()) {
                 realFile.createNewFile();
@@ -69,6 +75,7 @@ public class FileServiceImpl implements FileService {
             }
             return AjaxResult.error("创建目录" + realFile.getParentFile() + "失败");
         } catch (Exception e) {
+            e.printStackTrace();
             return AjaxResult.error(e.getMessage());
         }
     }
@@ -80,6 +87,7 @@ public class FileServiceImpl implements FileService {
             realFile.mkdirs();
             return AjaxResult.success();
         } catch (Exception e) {
+            e.printStackTrace();
             return AjaxResult.error(e.getMessage());
         }
     }
@@ -93,9 +101,9 @@ public class FileServiceImpl implements FileService {
             pathList.addAll(serverFile.getFileList());
             pathList.addAll(serverFile.getDirList());
             String cmdPrefix = "";
-            if (FileUtil.isCopy(serverFile)) {
+            if (FileUtils.isCopy(serverFile)) {
                 cmdPrefix = "cp ";
-            } else if (FileUtil.isCut(serverFile)) {
+            } else if (FileUtils.isCut(serverFile)) {
                 cmdPrefix = "rm -rf ";
             }
 
@@ -104,12 +112,12 @@ public class FileServiceImpl implements FileService {
             }
         } else {
             // 复制文件
-            if (FileUtil.isCopy(serverFile)) {
-                cmd += "cp -r " + (FileUtil.isOptFile(serverFile) ? FileUtil.getFullPath(serverFile) : serverFile.getDir()) + " " + serverFile.getDestDir() + " \n";
+            if (FileUtils.isCopy(serverFile)) {
+                cmd += "cp -r " + (FileUtils.isOptFile(serverFile) ? FileUtils.getFullPath(serverFile) : serverFile.getDir()) + " " + serverFile.getDestDir() + " \n";
             }
             // 剪切文件
-            else if (FileUtil.isCut(serverFile)) {
-                cmd += "mv -r " + (FileUtil.isOptFile(serverFile) ? FileUtil.getFullPath(serverFile) : serverFile.getDir()) + " " + serverFile.getDestDir() + " \n";
+            else if (FileUtils.isCut(serverFile)) {
+                cmd += "mv -r " + (FileUtils.isOptFile(serverFile) ? FileUtils.getFullPath(serverFile) : serverFile.getDir()) + " " + serverFile.getDestDir() + " \n";
             } else {
                 return AjaxResult.error("类型错误");
             }
@@ -120,6 +128,7 @@ public class FileServiceImpl implements FileService {
             RuntimeUtil.execForStr(cmd);
             return AjaxResult.success();
         } catch (Exception e) {
+            e.printStackTrace();
             return AjaxResult.error(e.getMessage());
         }
     }
@@ -135,7 +144,7 @@ public class FileServiceImpl implements FileService {
                 cmd += "rm -rf " + path + " \n";
             }
         } else {
-            cmd += "rm -rf " + (FileUtil.isOptFile(serverFile) ? FileUtil.getFullPath(serverFile) : serverFile.getDir());
+            cmd += "rm -rf " + (FileUtils.isOptFile(serverFile) ? FileUtils.getFullPath(serverFile) : serverFile.getDir());
         }
 
         log.info("cmd:  " + cmd);
@@ -143,17 +152,39 @@ public class FileServiceImpl implements FileService {
             RuntimeUtil.execForStr(cmd);
             return AjaxResult.success();
         } catch (Exception e) {
+            e.printStackTrace();
             return AjaxResult.error(e.getMessage());
         }
     }
 
     @Override
     public AjaxResult compress(ServerFile serverFile) {
-        return null;
+        try {
+            List<String> pathList = new ArrayList<>();
+            if (serverFile.isBatchOpt()) {
+                pathList.addAll(serverFile.getFileList());
+                pathList.addAll(serverFile.getDirList());
+            } else {
+                pathList.add(FileUtils.getFullPath(serverFile));
+            }
+            File[] fileArr = (File[]) pathList.stream().map(path -> FileUtil.file(path)).toArray();
+
+            ZipUtil.zip(new File(fileArr[0].getParentFile().getAbsolutePath() + File.separator + System.currentTimeMillis() + ".zip"), false, fileArr);
+            return AjaxResult.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error(e.getMessage());
+        }
     }
 
     @Override
     public AjaxResult decompression(ServerFile serverFile) {
-        return null;
+        try {
+            ZipUtil.unzip(FileUtils.getFullPath(serverFile));
+            return AjaxResult.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error(e.getMessage());
+        }
     }
 }

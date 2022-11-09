@@ -5,6 +5,9 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author mysgk
+ */
 @Data
 public class ServerFile {
 
@@ -32,6 +35,8 @@ public class ServerFile {
      * 0 复制
      * 1 剪切
      * 2 删除
+     * 3 压缩
+     * 4 解压
      */
     private int opType;
 }

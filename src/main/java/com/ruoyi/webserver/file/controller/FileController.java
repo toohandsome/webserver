@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 
-import static com.ruoyi.webserver.file.util.FileUtil.getFullPath;
+import static com.ruoyi.webserver.file.util.FileUtils.getFullPath;
 
 @Controller
 @RequestMapping("/file")
